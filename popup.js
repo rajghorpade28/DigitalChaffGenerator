@@ -1,6 +1,7 @@
 import { StorageManager } from './storage.js';
 import { classifyAll, getCleanupTargets, isEssentialCookie, isFirstParty } from './cookie_classifier.js';
 
+console.log("POPUP_BUNDLE_ALIVE");
 document.addEventListener("DOMContentLoaded", async () => {
     const toggleBtn = document.getElementById("toggleBtn");
     const statusText = document.getElementById("statusText");
@@ -71,17 +72,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         countdownContainer.style.display = isEnabled ? "block" : "none";
         
         if (isEnabled) {
-            chrome.idle.queryState(30, (state) => {
-                if (state === 'active' && idleSeconds > 0) {
-                    statusText.textContent = "Standby: Waiting for user to idle";
-                    statusIndicator.style.background = "#f39c12";
-                    statusIndicator.style.boxShadow = "0 0 8px #f39c12";
-                } else {
-                    statusText.textContent = "Active: Injecting background chaff";
-                    statusIndicator.style.background = "#2ecc71";
-                    statusIndicator.style.boxShadow = "0 0 8px #2ecc71";
+            async function updateStatus() {
+                try {
+                    // Helper for timeout-based messaging
+                    const sendMessageWithTimeout = (message, timeout = 2500) => {
+                        return Promise.race([
+                            chrome.runtime.sendMessage(message),
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('Handshake timeout')), timeout))
+                        ]);
+                    };
+
+                    const status = await sendMessageWithTimeout({ type: 'GET_STATUS' });
+                    
+                    if (status) {
+                        statusText.innerText = status.isActive ? "🟢 Active" : "🔴 Idle";
+                        statusIndicator.style.background = status.isActive ? "#27ae60" : "#e74c3c";
+                        statusIndicator.classList.remove('pulse');
+                        toggleBtn.innerText = status.isActive ? "Stop Generator" : "Start Generator";
+                    }
+                } catch (err) {
+                    console.error('Handshake failed:', err);
+                    statusText.innerText = "🔴 System Offline";
+                    statusIndicator.style.background = "#95a5a6";
                 }
-            });
+            }
+            updateStatus();
         } else {
             statusText.textContent = "System Disabled";
             statusIndicator.style.background = "#e74c3c";

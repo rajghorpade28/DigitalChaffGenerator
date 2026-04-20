@@ -1,7 +1,7 @@
 {
-  "name": "dcg",
+  "name": "digital-chaff-generator",
   "version": "1.0.0",
-  "description": "A privacy-focused Google Chrome extension that generates human-like browsing \"noise\" during system idle periods to increase local behavioral entropy and decrease tracker profiling certainty. By generating realistic background web sessions across randomized personas, DCG obfuscates your true online footprint.",
+  "description": "A privacy-centric Chrome extension that generates realistic browsing noise to obfuscate behavioral tracking.",
   "main": "background.js",
   "scripts": {
     "build": "webpack",

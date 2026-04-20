@@ -37,11 +37,20 @@ export const SessionManager = {
 
     async onTabLoaded(tabId, category) {
         try {
+            // Determine if we are running in bundled mode (dist) or developer mode (root)
+            // We'll use a helper to resolve names
+            const resolve = (name) => {
+                const manifest = chrome.runtime.getManifest();
+                // If the background script is bundled, we assume we are in dist mode
+                const isDist = manifest.background?.service_worker?.includes('.bundle.js');
+                return isDist ? name.replace('.js', '.bundle.js').replace('content_script', 'content') : name;
+            };
+
             await chrome.scripting.executeScript({
-                target: { tabId: tabId },
-                files: ['content_script.js', 'behavior_simulator.js']
+                target: { tabId },
+                files: [resolve('content_script.js'), resolve('behavior_simulator.js')]
             });
-            console.log("[DCG] Simulation scripts directly injected into target background tab.");
+            console.log(`[DCG Session] Scripts injected into tab ${tabId}`);
             
             MetricsEngine.updateMetrics(category);
             

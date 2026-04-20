@@ -1,33 +1,21 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const WebpackObfuscator = require('webpack-obfuscator');
 
 module.exports = {
-  mode: 'production',
+  mode: 'development', // Use development for clear debugging
+  devtool: 'cheap-module-source-map', // Help with debugging
   entry: {
     background: './background.js',
     content: './content_script.js',
-    popup: './popup.js'
+    popup: './popup.js',
+    behavior_simulator: './behavior_simulator.js'
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].bundle.js',
     clean: true
   },
-  optimization: {
-    minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          format: {
-            comments: false,
-          },
-        },
-        extractComments: false,
-      }),
-    ],
-  },
+  // REMOVED BABEL - Chrome supports modern JS natively
   plugins: [
     new CopyPlugin({
       patterns: [
@@ -35,10 +23,9 @@ module.exports = {
           from: 'manifest.json', 
           to: 'manifest.json',
           transform(content) {
-            // Update manifest to point to bundled scripts
             const manifest = JSON.parse(content.toString());
             if (manifest.background && manifest.background.service_worker) {
-              manifest.background.service_worker = 'background.bundle.js';
+              manifest.background.service_worker = manifest.background.service_worker.replace(/background\.js/g, 'background.bundle.js');
             }
             return JSON.stringify(manifest, null, 2);
           }
@@ -47,25 +34,15 @@ module.exports = {
           from: 'popup.html', 
           to: 'popup.html',
           transform(content) {
-            // Update HTML to point to bundled popup script
-            return content.toString().replace('popup.js', 'popup.bundle.js');
+            // Use global regex to replace ALL occurrences (including script tags)
+            return content.toString().replace(/popup\.js/g, 'popup.bundle.js');
           }
         },
         { from: 'styles.css', to: 'styles.css' },
         { from: 'icons', to: 'icons' }
       ],
     }),
-    new WebpackObfuscator({
-      rotateStringArray: true,
-      stringArray: true,
-      stringArrayEncoding: ['base64'],
-      controlFlowFlattening: true,
-      controlFlowFlatteningThreshold: 0.5,
-      deadCodeInjection: true,
-      deadCodeInjectionThreshold: 0.2,
-      compact: true,
-      unicodeEscapeSequence: false
-    }, ['background.bundle.js'])
+    // OBFUSCATOR REMOVED FOR EMERGENCY DIAGNOSIS
   ],
   resolve: {
     extensions: ['.js']
