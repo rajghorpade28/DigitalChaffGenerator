@@ -1,87 +1,66 @@
-# 🛡️ Digital Chaff Generator (DCG)
+# 🛡️ Digital Chaff Generator
 
-**Reclaiming Your Digital Privacy through Behavioral Obfuscation.**
-
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
-[![Chrome Manifest V3](https://img.shields.io/badge/Chrome-MV3-orange.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
-[![Build: Webpack](https://img.shields.io/badge/Build-Webpack-blueviolet.svg)](https://webpack.js.org/)
+**Reclaiming Privacy with High-Fidelity Behavioral Obfuscation.**
 
 ---
 
-## 📖 Overview
+### 🔥 The Mission
+Digital trackers build precise profiles by analyzing your browsing patterns. **DCG** disrupts this by injecting realistic, automated "chaff" (noise) into your session, effectively drowning out your true digital identity with high-entropy browsing behavior.
 
-The **Digital Chaff Generator (DCG)** is a high-performance, privacy-centric Chrome extension designed to counteract intrusive behavioral profiling. By injecting realistic, client-side browsing "noise" during idle periods, DCG increases your local behavioral entropy and decreases the certainty of tracker profiling.
-
-Unlike simple blockers, DCG uses a **Persona-Based Interaction Engine** to simulate diverse, human-like browsing patterns, effectively "drowning out" your true digital footprint with high-quality chaff.
-
----
-
-## ✨ Core Features
-
-### 🧠 Intelligent Persona Engine
-Switch between randomized personas (e.g., *Tech Curious*, *Health Conscious*, *Finance Planner*) to generate realistic background traffic that misleads behavioral algorithms.
-
-### 📊 Real-Time Metrics Dashboard
-Track your impact with a custom local analytics suite:
-- **Entropy Score**: A live measurement of your browsing unpredictability.
-- **Tracking Certainty**: A calculated estimate of how accurately a profile can be built on your activity.
-
-### 🛡️ Advanced Phishing Shield
-A modular detection engine with two modes:
-- **Accurate Mode**: Real-time validation via Google Safe Browsing API.
-- **Privacy Mode**: 100% local analysis using ML scoring and a trusted domain allowlist.
-
-### 🍪 Risk-Based Cookie Sanitizer
-A categorical cleanup tool that protects essential session/auth cookies while surgically removing high-risk tracking and marketing cookies based on a custom classification engine.
+<p align="center">
+  <img src="https://img.shields.io/badge/Privacy-Obsidian_Theme-blueviolet?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Status-Neon_Active-08f7af?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Build-Cyber_Optimized-00f2ff?style=for-the-badge" />
+</p>
 
 ---
 
-## 🏗️ Technical Architecture
-
-DCG is built with a custom **Hybrid Development Workflow**:
-
-- **Modern Bundling**: Powered by **Webpack 5** for high-performance bundling and minification.
-- **Production Hardening**: Integrated **JavaScript Obfuscation** to protect internal logic and prevent reverse engineering.
-- **Manifest V3 Native**: Fully compliant with modern Chrome security standards, utilizing background service workers for resource efficiency.
-
----
-
-## 🚀 Getting Started
-
-### For Users (Production)
-1.  Download or build the latest release.
-2.  Open Chrome and navigate to `chrome://extensions/`.
-3.  Enable **Developer mode**.
-4.  Click **Load unpacked** and select the **`dist/`** folder.
-
-### For Developers
-1.  Clone the repository.
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Load the **root folder** in Chrome for instant testing (Developer Mode).
-4.  To generate a production-ready build:
-    ```bash
-    npm run build
-    ```
-
----
-
-## 🔒 Privacy Commitment
-
-DCG is designed with a **Zero-Data** philosophy:
-- ❌ No data collection.
-- ❌ No external tracking.
-- ✅ 100% Client-side execution.
-*All metrics and logs stay on your local machine.*
-
----
-
-## 📜 License
-This project is licensed under the **ISC License**. See the `package.json` for details.
-
----
+### ⚡ Vibrant Features
 
 > [!TIP]
-> **Pro Tip**: Use "Active Sessions" to monitor the Chaff Generator in real-time as it opens and manages background tabs while you're away!
+> **Dynamic Persona Engine**: Rotate through specialized identities like *Finance Planner* or *Tech Enthusiast* to diversify your profile.
+
+> [!IMPORTANT]
+> **Cyber-Metrics Dashboard**: Real-time visualization of Entropy and Profile Certainty scores.
+
+> [!CAUTION]
+> **Zero-Knowledge Architecture**: 100% local execution. No data ever leaves your machine.
+
+---
+
+### 🛠️ Technical Stack & Security
+
+| Feature | Technology | Benefit |
+| :--- | :--- | :--- |
+| **Bundling** | Webpack 5 | Lightning-fast execution & small footprint |
+| **Security** | Obfuscation | Protects privacy logic from reverse engineering |
+| **Aesthetic** | Cyber-Neon | Glassmorphism & Neon Glow for a premium feel |
+| **Engine** | Manifest V3 | Modern, secure Extension architecture |
+
+---
+
+### 🚀 Getting Started
+
+<details>
+<summary><b>📦 For Users (Install Build)</b></summary>
+1. Download the latest release.
+2. Load the <code>dist/</code> folder in <code>chrome://extensions</code> (Developer Mode).
+3. Experience the neon cyber-privacy vibe instantly.
+</details>
+
+<details>
+<summary><b>💻 For Developers (Source)</b></summary>
+1. Clone the repo and run <code>npm install</code>.
+2. Load the root folder for live development.
+3. Pulse the build with <code>npm run build</code> to generate the obfuscated production version.
+</details>
+
+---
+
+### 📜 Digital Transparency
+Licensed under the **ISC License**. **100% Open Source and 0% Data Collection.**
+
+---
+<p align="center">
+  <i>Stay Hidden. Stay Random. Stay Secure.</i>
+</p>
