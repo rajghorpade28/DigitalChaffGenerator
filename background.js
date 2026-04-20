@@ -4,13 +4,13 @@ import { SessionManager } from './session_manager.js';
 import { PhishingDetector } from './phishing_detector.js';
 
 const PASSIVE_ALARM_NAME = 'passiveWave';
-const PASSIVE_INTERVAL_MINUTES = 120; // 2 hours
+const PASSIVE_INTERVAL_MINUTES = 30; // 30 minutes
 
 function scheduleNextWave() {
     const nextWaveTime = Date.now() + PASSIVE_INTERVAL_MINUTES * 60 * 1000;
     StorageManager.set('nextWaveTime', nextWaveTime);
     chrome.alarms.create(PASSIVE_ALARM_NAME, { delayInMinutes: PASSIVE_INTERVAL_MINUTES });
-    console.log('[DCG] Passive wave scheduled in 2 hours.');
+    console.log('[DCG] Passive wave scheduled in 30 minutes.');
 }
 
 chrome.runtime.onInstalled.addListener(async () => {

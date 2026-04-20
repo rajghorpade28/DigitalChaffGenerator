@@ -54,9 +54,10 @@ export const SessionManager = {
             
             MetricsEngine.updateMetrics(category);
             
-            // Let the session live for 1 to 3 minutes
-            const durationMs = Math.floor(Math.random() * (180000 - 60000 + 1)) + 60000;
+            // Let the session live for 2 to 4 minutes (increased from 1-3 based on user feedback)
+            const durationMs = Math.floor(Math.random() * (240000 - 120000 + 1)) + 120000;
             this.sessionTimer = setTimeout(() => {
+                console.log(`[DCG Session] Reached duration limit (${durationMs/1000}s). Closing tab automatically.`);
                 this.endSession();
             }, durationMs);
         } catch (error) {
