@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Digital Chaff Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="header">
+        <h1>Digital Chaff Generator</h1>
+        <p class="subtitle">Client-Side Privacy Noise Injector</p>
+    </div>
+
+    <div class="pad-container">
+        <div class="status-card">
+            <div class="status-indicator" id="statusIndicator"></div>
+            <span id="statusText">Initiating system...</span>
+        </div>
+
+        <div id="countdown-container" style="display: none; text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 12px; color: #a0aebf; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; margin-bottom: 5px;">Idle Countdown</div>
+            <div id="countdownTimer" style="font-size: 38px; font-weight: 800; color: #e74c3c; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 10px rgba(231, 76, 60, 0.3);">00:30</div>
+        </div>
+
+        <div style="margin-bottom: 20px; text-align: center; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px;">
+            <p style="margin: 0 0 10px 0; font-size: 13px; font-weight: 600;">Current Persona: <span id="currentPersona" style="color: #3498db;">Loading...</span></p>
+            <select id="personaSelect" style="padding: 6px; width: 100%; border-radius: 4px; border: 1px solid #ccc; font-family: inherit;">
+                <option value="tech_curious">tech_curious</option>
+                <option value="health_conscious">health_conscious</option>
+                <option value="finance_planner">finance_planner</option>
+                <option value="travel_dreamer">travel_dreamer</option>
+            </select>
+        </div>
+
+        <button id="toggleBtn" class="btn">Start Generator</button>
+        <button id="closeNoiseBtn" class="btn btn-secondary" style="margin-top: -12px; margin-bottom: 24px;">Close Noise Tab</button>
+
+        <h3 class="metrics-title">Current Profile Metrics</h3>
+        <div class="metrics-grid">
+            <div class="metric">
+                <div class="metric-value" id="sessionCount">0</div>
+                <div class="metric-label">Sessions</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="entropyScore">0.00</div>
+                <div class="metric-label">Entropy Score</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="certaintyScore">100%</div>
+                <div class="metric-label">Tracking Certainty</div>
+            </div>
+        </div>
+
+        <!-- ── Passive Wave Countdown ─────────────────────────────── -->
+        <div class="wave-card">
+            <div class="wave-header">
+                <span class="wave-label">〰 Next Noise Wave</span>
+                <span class="wave-mode-pill">Passive · Every 2 hrs</span>
+            </div>
+            <div class="wave-timer-row">
+                <div id="waveTimerDisplay" class="wave-timer">--:--:--</div>
+                <button id="triggerWaveBtn" class="wave-trigger-btn" title="Fire a passive wave now">Fire Now</button>
+            </div>
+            <div id="waveStatus" class="wave-status" style="display:none;"></div>
+        </div>
+
+        <!-- ── Phishing Detection ─────────────────────────────────── -->
+        <div class="phish-card">
+            <div class="phish-header">
+                <span class="phish-title">🛡 Phishing Detection</span>
+                <span id="phishStatusPill" class="phish-status-pill active">Active</span>
+            </div>
+
+            <!-- Current page risk -->
+            <div class="phish-current-row">
+                <div class="phish-current-label">Current page</div>
+                <div style="text-align: right;">
+                    <div id="phishCurrentRisk" class="phish-risk-badge unknown">Checking…</div>
+                    <div id="phishCurrentReason" class="phish-reason-sub"></div>
+                </div>
+            </div>
+            <div id="phishCurrentUrl" class="phish-current-url"></div>
+
+            <!-- Mode selector -->
+            <div class="phish-mode-row">
+                <button id="phishModeAccurate" class="phish-mode-btn selected" title="Use Google Safe Browsing API">
+                    🌐 Accurate
+                </button>
+                <button id="phishModePrivacy" class="phish-mode-btn" title="Local checks only — no external calls">
+                    🔒 Privacy
+                </button>
+            </div>
+
+            <!-- Threat alert banner (hidden by default) -->
+            <div id="phishAlert" class="phish-alert" style="display:none;">
+                <div class="phish-alert-title">⚠️ Threat Detected</div>
+                <div id="phishAlertUrl" class="phish-alert-url"></div>
+                <div id="phishAlertReason" class="phish-alert-reason"></div>
+                <button id="phishAlertDismiss" class="phish-alert-dismiss">Dismiss</button>
+            </div>
+
+            <div class="phish-footnote" id="phishModeNote">Accurate mode uses Google Safe Browsing API.</div>
+        </div>
+
+        <!-- ── Cookie Manager ─────────────────────────────────── -->
+
+        <div class="cookie-card">
+            <div class="cookie-header">
+                <span class="cookie-title">
+                    🍪 Browser Cookies &nbsp;<span id="cookieCount" class="cookie-total-badge">0</span>
+                </span>
+                <button id="toggleCookieListBtn" class="cookie-toggle-btn">Show Details</button>
+            </div>
+
+            <!-- Risk summary row -->
+            <div class="risk-row">
+                <span class="risk-badge safe">🟢 <span id="safeCount">0</span> Safe</span>
+                <span class="risk-badge medium">🟡 <span id="medCount">0</span> Medium</span>
+                <span class="risk-badge high">🔴 <span id="highCount">0</span> High</span>
+            </div>
+
+            <!-- Protect logged-in sites toggle -->
+            <div class="protect-row">
+                <label class="protect-label" for="protectLoggedInToggle">
+                    🔒 Protect logged-in sites
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="protectLoggedInToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <!-- Cleanup mode buttons -->
+            <div class="cleanup-row">
+                <button id="cleanSafeBtn"       class="cleanup-btn safe-btn"   title="Remove only confirmed trackers">🛡 Safe Clean</button>
+                <button id="cleanBalancedBtn"    class="cleanup-btn bal-btn"    title="Remove trackers + long-lived 3rd party">⚖ Balanced</button>
+                <button id="cleanAggressiveBtn"  class="cleanup-btn agg-btn"   title="Remove all except auth &amp; session cookies">🧹 Aggressive</button>
+            </div>
+
+            <!-- Cleanup status message -->
+            <div id="cleanupStatus" class="cleanup-status" style="display:none;"></div>
+
+            <!-- Scrollable detail list (hidden by default) -->
+            <div id="cookieList" style="display:none; max-height:180px; overflow-y:auto; margin-top:10px; border-top:1px solid var(--border-color); padding-top:8px;">
+                <!-- rendered by popup.js -->
+            </div>
+        </div>
+
+        <div class="info-footer">
+
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Operates exclusively when the user is idle.
+        </div>
+    </div>
+    <script type="module" src="popup.js"></script>
+</body>
+</html>

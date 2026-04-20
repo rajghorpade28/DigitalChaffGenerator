@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            width: 300px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 15px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 5px;
+        }
+
+        #status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-right: 5px;
+        }
+
+        .active {
+            background-color: #2ecc71 !important;
+        }
+
+        .idle {
+            background-color: #f39c12 !important;
+        }
+
+        .footer {
+            font-size: 10px;
+            color: #999;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Digital Chaff</h2>
+
+    <div class="stat-box">
+        <div class="label">System Status</div>
+        <div class="value">
+            <span id="status-indicator"></span>
+            <span id="status-text">Idle</span>
+        </div>
+    </div>
+
+    <div class="stat-box">
+        <div class="label">Active Persona</div>
+        <div class="value" id="persona-name">None</div>
+    </div>
+
+    <div class="stat-box">
+        <div class="label">Chaff Sessions Run</div>
+        <div class="value" id="session-count">0</div>
+    </div>
+
+    <button id="btn-run-now"
+        style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Run
+        Now (Test)</button>
+
+    <div class="footer">
+        Protects by obfuscation.<br>
+        No external data sent.
+    </div>
+
+    <script src="ui_popup.js" type="module"></script>
+</body>
+
+</html>

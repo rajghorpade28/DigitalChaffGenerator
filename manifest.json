@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Digital Chaff Generator",
+  "version": "1.0",
+  "description": "Protects privacy by generating human-like browsing noise when idle.",
+  "permissions": ["tabs", "scripting", "idle", "storage", "cookies", "alarms"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
