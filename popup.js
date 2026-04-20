@@ -495,13 +495,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         phishAlertEl.style.display   = 'block';
     }
 
-    // Listen for live HIGH-risk alerts pushed from the background
+    // Listen for live updates from background (Phishing alerts and Persona Rotation)
     chrome.runtime.onMessage.addListener((msg) => {
         if (msg.type === 'PHISHING_ALERT') {
             setCurrentRisk(msg.risk, msg.url, msg.reason);
             phishAlertUrl.textContent    = msg.url;
             phishAlertReason.textContent = `${msg.risk} \u2014 ${msg.reason}`;
             phishAlertEl.style.display   = 'block';
+        } else if (msg.type === 'PERSONA_CHANGED') {
+            console.log('[DCG] Persona rotation detected:', msg.persona);
+            document.getElementById("currentPersona").textContent = msg.persona;
+            document.getElementById("personaSelect").value = msg.persona;
         }
     });
 

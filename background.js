@@ -4,7 +4,9 @@ import { SessionManager } from './session_manager.js';
 import { PhishingDetector } from './phishing_detector.js';
 
 const PASSIVE_ALARM_NAME = 'passiveWave';
+const PERSONA_ALARM_NAME = 'personaRotation';
 const PASSIVE_INTERVAL_MINUTES = 30; // 30 minutes
+const PERSONA_INTERVAL_MINUTES = 120; // 2 hours
 
 function scheduleNextWave() {
     const nextWaveTime = Date.now() + PASSIVE_INTERVAL_MINUTES * 60 * 1000;
@@ -28,6 +30,14 @@ chrome.runtime.onInstalled.addListener(async () => {
     chrome.alarms.get(PASSIVE_ALARM_NAME, (existing) => {
         if (!existing) scheduleNextWave();
     });
+
+    // Schedule the first persona rotation (2 hours)
+    chrome.alarms.get(PERSONA_ALARM_NAME, (existing) => {
+        if (!existing) {
+            chrome.alarms.create(PERSONA_ALARM_NAME, { delayInMinutes: PERSONA_INTERVAL_MINUTES, periodInMinutes: PERSONA_INTERVAL_MINUTES });
+            console.log(`[DCG] Persona rotation scheduled every ${PERSONA_INTERVAL_MINUTES} minutes.`);
+        }
+    });
     console.log("[DCG] Core Extension Installed and Pre-configured");
 });
 
@@ -37,21 +47,23 @@ Scheduler.init();
 SessionManager.init();
 PhishingDetector.init(); // ── Phishing URL detection (non-blocking)
 
-// ── Passive 2-hour wave alarm ─────────────────────────────────────────────
+// ── Passive waves and Persona Rotation alarm handler ────────────────────────
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-    if (alarm.name !== PASSIVE_ALARM_NAME) return;
-    console.log('[DCG] Passive wave alarm fired!');
-
-    const isEnabled = await StorageManager.get('isEnabled', false);
-    if (isEnabled) {
-        console.log('[DCG] Running passive noise session.');
-        SessionManager.startSession();
-    } else {
-        console.log('[DCG] Passive wave skipped — generator is disabled.');
+    if (alarm.name === PASSIVE_ALARM_NAME) {
+        console.log('[DCG] Passive wave alarm fired!');
+        const isEnabled = await StorageManager.get('isEnabled', false);
+        if (isEnabled) {
+            console.log('[DCG] Running passive noise session.');
+            SessionManager.startSession();
+        } else {
+            console.log('[DCG] Passive wave skipped — generator is disabled.');
+        }
+        scheduleNextWave();
+    } else if (alarm.name === PERSONA_ALARM_NAME) {
+        console.log('[DCG] Persona rotation alarm fired!');
+        const { PersonaEngine } = await import('./persona_engine.js');
+        await PersonaEngine.rotatePersona();
     }
-
-    // Always reschedule the next wave
-    scheduleNextWave();
 });
 
 // ── Message listener ──────────────────────────────────────────────────────

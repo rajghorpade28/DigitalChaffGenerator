@@ -22,5 +22,18 @@ export const PersonaEngine = {
             }
         }
         return 'news';
+    },
+
+    async rotatePersona() {
+        const keys = Object.keys(this.profiles).filter(k => k !== 'default');
+        const current = await StorageManager.get('currentPersona', 'tech_curious');
+        const others = keys.filter(k => k !== current);
+        
+        const next = others[Math.floor(Math.random() * others.length)];
+        console.log(`[PersonaEngine] Rotating persona: ${current} -> ${next}`);
+        
+        await StorageManager.set('currentPersona', next);
+        chrome.runtime.sendMessage({ type: "PERSONA_CHANGED", persona: next }).catch(() => {});
+        return next;
     }
 };
