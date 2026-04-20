@@ -1,66 +1,24 @@
-# 🛡️ Digital Chaff Generator
+# Digital Chaff Generator (DCG)
 
-**Reclaiming Privacy with High-Fidelity Behavioral Obfuscation.**
+## Overview
+A privacy-focused Google Chrome extension that generates human-like browsing "noise" during system idle periods to increase local behavioral entropy and decrease tracker profiling certainty. By generating realistic background web sessions across randomized personas, DCG obfuscates your true online footprint. 
 
----
+## Build & Installation Instructions
 
-### 🔥 The Mission
-Digital trackers build precise profiles by analyzing your browsing patterns. **DCG** disrupts this by injecting realistic, automated "chaff" (noise) into your session, effectively drowning out your true digital identity with high-entropy browsing behavior.
+### 1. Load the Extension in Chrome
+1. Open Google Chrome.
+2. Navigate to `chrome://extensions/`.
+3. In the top right corner, toggle **Developer mode** to ON.
+4. Click the **Load unpacked** button that appears in the top left.
+5. Select the `digital_chaff_generator` folder (where these files reside).
+6. Ensure the extension is enabled.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Privacy-Obsidian_Theme-blueviolet?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Status-Neon_Active-08f7af?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Build-Cyber_Optimized-00f2ff?style=for-the-badge" />
-</p>
-
----
-
-### ⚡ Vibrant Features
-
-> [!TIP]
-> **Dynamic Persona Engine**: Rotate through specialized identities like *Finance Planner* or *Tech Enthusiast* to diversify your profile.
-
-> [!IMPORTANT]
-> **Cyber-Metrics Dashboard**: Real-time visualization of Entropy and Profile Certainty scores.
-
-> [!CAUTION]
-> **Zero-Knowledge Architecture**: 100% local execution. No data ever leaves your machine.
-
----
-
-### 🛠️ Technical Stack & Security
-
-| Feature | Technology | Benefit |
-| :--- | :--- | :--- |
-| **Bundling** | Webpack 5 | Lightning-fast execution & small footprint |
-| **Security** | Obfuscation | Protects privacy logic from reverse engineering |
-| **Aesthetic** | Cyber-Neon | Glassmorphism & Neon Glow for a premium feel |
-| **Engine** | Manifest V3 | Modern, secure Extension architecture |
-
----
-
-### 🚀 Getting Started
-
-<details>
-<summary><b>📦 For Users (Install Build)</b></summary>
-1. Download the latest release.
-2. Load the <code>dist/</code> folder in <code>chrome://extensions</code> (Developer Mode).
-3. Experience the neon cyber-privacy vibe instantly.
-</details>
-
-<details>
-<summary><b>💻 For Developers (Source)</b></summary>
-1. Clone the repo and run <code>npm install</code>.
-2. Load the root folder for live development.
-3. Pulse the build with <code>npm run build</code> to generate the obfuscated production version.
-</details>
-
----
-
-### 📜 Digital Transparency
-Licensed under the **ISC License**. **100% Open Source and 0% Data Collection.**
-
----
-<p align="center">
-  <i>Stay Hidden. Stay Random. Stay Secure.</i>
-</p>
+### 2. How to Test It
+1. Click the DCG icon in your Chrome extensions menu.
+2. The popup should open displaying "System Disabled" initially.
+3. Click **Start Generator**.
+4. The status will indicate "**Standby: Waiting for user to idle**".
+5. Do not move your mouse or press any keys for at least **15 seconds** (the minimum time Chrome uses to declare an "idle" state).
+6. **Watch carefully**: A new Chrome tab will open automatically in the background without stealing your focus. The tab will navigate to a Wiki article.
+7. Switch back to your popup safely after a bit, and watch the Metrics increment! If you move your mouse, the extension detects you're active and immediately kills the session (closing the tab).
+8. Track the growing **Entropy Score** and diminishing **Profile Certainty**.

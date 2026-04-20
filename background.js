@@ -1,4 +1,3 @@
-console.log("BACKGROUND_BUNDLE_ALIVE");
 import { Scheduler } from './scheduler.js';
 import { StorageManager } from './storage.js';
 import { SessionManager } from './session_manager.js';

@@ -1,9 +1,10 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const WebpackObfuscator = require('webpack-obfuscator');
 
 module.exports = {
-  mode: 'development', // Use development for clear debugging
-  devtool: 'cheap-module-source-map', // Help with debugging
+  mode: 'production',
   entry: {
     background: './background.js',
     content: './content_script.js',
@@ -15,7 +16,19 @@ module.exports = {
     filename: '[name].bundle.js',
     clean: true
   },
-  // REMOVED BABEL - Chrome supports modern JS natively
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          format: {
+            comments: false,
+          },
+        },
+        extractComments: false,
+      }),
+    ],
+  },
   plugins: [
     new CopyPlugin({
       patterns: [
@@ -42,7 +55,15 @@ module.exports = {
         { from: 'icons', to: 'icons' }
       ],
     }),
-    // OBFUSCATOR REMOVED FOR EMERGENCY DIAGNOSIS
+    new WebpackObfuscator({
+      rotateStringArray: true,
+      stringArray: true,
+      stringArrayEncoding: ['base64'],
+      controlFlowFlattening: false, // Disabled for stability in extensions
+      deadCodeInjection: false,     // Disabled for stability in extensions
+      compact: true,
+      unicodeEscapeSequence: false
+    }, ['background.bundle.js', 'behavior_simulator.bundle.js'])
   ],
   resolve: {
     extensions: ['.js']

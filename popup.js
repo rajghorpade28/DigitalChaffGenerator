@@ -1,7 +1,6 @@
 import { StorageManager } from './storage.js';
 import { classifyAll, getCleanupTargets, isEssentialCookie, isFirstParty } from './cookie_classifier.js';
 
-console.log("POPUP_BUNDLE_ALIVE");
 document.addEventListener("DOMContentLoaded", async () => {
     const toggleBtn = document.getElementById("toggleBtn");
     const statusText = document.getElementById("statusText");
