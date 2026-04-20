@@ -166,6 +166,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    const personaRotationTimerEl = document.getElementById('personaRotationTimer');
+    async function updatePersonaRotationCountdown() {
+        const nextRotationTime = await StorageManager.get('nextPersonaRotationTime');
+        if (!nextRotationTime) { 
+            personaRotationTimerEl.textContent = '--:--:--'; 
+            return; 
+        }
+        const msLeft = nextRotationTime - Date.now();
+        personaRotationTimerEl.textContent = formatCountdown(msLeft);
+    }
+
     triggerBtn.addEventListener('click', async () => {
         triggerBtn.disabled = true;
         triggerBtn.textContent = 'Firing…';
@@ -395,6 +406,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         refreshCookies();
         updateWaveCountdown();
+        updatePersonaRotationCountdown();
     }, 1000);
 
     // ── Phishing Detection UI ───────────────────────────────────────────────

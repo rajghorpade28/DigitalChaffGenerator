@@ -15,6 +15,13 @@ function scheduleNextWave() {
     console.log('[DCG] Passive wave scheduled in 30 minutes.');
 }
 
+function scheduleNextPersonaRotation() {
+    const nextRotationTime = Date.now() + PERSONA_INTERVAL_MINUTES * 60 * 1000;
+    StorageManager.set('nextPersonaRotationTime', nextRotationTime);
+    chrome.alarms.create(PERSONA_ALARM_NAME, { delayInMinutes: PERSONA_INTERVAL_MINUTES, periodInMinutes: PERSONA_INTERVAL_MINUTES });
+    console.log(`[DCG] Persona rotation scheduled in ${PERSONA_INTERVAL_MINUTES} minutes.`);
+}
+
 chrome.runtime.onInstalled.addListener(async () => {
     const isEnabled = await StorageManager.get('isEnabled');
     if (isEnabled === undefined) {
@@ -34,8 +41,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     // Schedule the first persona rotation (2 hours)
     chrome.alarms.get(PERSONA_ALARM_NAME, (existing) => {
         if (!existing) {
-            chrome.alarms.create(PERSONA_ALARM_NAME, { delayInMinutes: PERSONA_INTERVAL_MINUTES, periodInMinutes: PERSONA_INTERVAL_MINUTES });
-            console.log(`[DCG] Persona rotation scheduled every ${PERSONA_INTERVAL_MINUTES} minutes.`);
+            scheduleNextPersonaRotation();
         }
     });
     console.log("[DCG] Core Extension Installed and Pre-configured");
@@ -63,6 +69,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         console.log('[DCG] Persona rotation alarm fired!');
         const { PersonaEngine } = await import('./persona_engine.js');
         await PersonaEngine.rotatePersona();
+        scheduleNextPersonaRotation();
     }
 });
 
