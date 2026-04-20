@@ -13,3 +13,10 @@ Thumbs.db
 
 # Contains hardcoded API key — never commit this file
 phishing_detector.js
+
+# Build artifacts
+node_modules/
+dist/
+dist.zip
+package-lock.json
+.vscode/

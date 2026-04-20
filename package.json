@@ -1,0 +1,32 @@
+{
+  "name": "dcg",
+  "version": "1.0.0",
+  "description": "A privacy-focused Google Chrome extension that generates human-like browsing \"noise\" during system idle periods to increase local behavioral entropy and decrease tracker profiling certainty. By generating realistic background web sessions across randomized personas, DCG obfuscates your true online footprint.",
+  "main": "background.js",
+  "scripts": {
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajghorpade28/dcg.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rajghorpade28/dcg/issues"
+  },
+  "homepage": "https://github.com/rajghorpade28/dcg#readme",
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "babel-loader": "^10.1.1",
+    "copy-webpack-plugin": "^14.0.0",
+    "javascript-obfuscator": "^5.4.1",
+    "terser-webpack-plugin": "^5.4.0",
+    "webpack": "^5.106.2",
+    "webpack-cli": "^7.0.2",
+    "webpack-obfuscator": "^3.6.1"
+  }
+}
