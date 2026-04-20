@@ -30,11 +30,6 @@
                 <option value="finance_planner">finance_planner</option>
                 <option value="travel_dreamer">travel_dreamer</option>
             </select>
-            <div style="font-size: 11px; color: #a0aebf; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                <span>🔄 Next Rotation in:</span>
-                <span id="personaRotationTimer" style="font-weight: 700; color: #3498db; font-family: 'Courier New', Courier, monospace;">--:--:--</span>
-                <span style="font-size: 9px; background: rgba(52, 152, 219, 0.1); color: #3498db; padding: 1px 5px; border-radius: 10px; margin-left: 5px;">Every 2 hrs</span>
-            </div>
         </div>
 
         <button id="toggleBtn" class="btn">Start Generator</button>
@@ -56,7 +51,17 @@
             </div>
         </div>
 
-        <!-- ── Passive Wave Countdown ─────────────────────────────── -->
+        <h3 class="metrics-title">Autonomous Schedules</h3>
+        <div class="wave-card" style="margin-bottom: 12px;">
+            <div class="wave-header">
+                <span class="wave-label">🎭 Next Identity Shift</span>
+                <span class="wave-mode-pill" style="background: rgba(52, 152, 219, 0.1); color: #3498db;">Every 2 hrs</span>
+            </div>
+            <div class="wave-timer-row" style="justify-content: center;">
+                <div id="personaRotationTimer" class="wave-timer" style="color: #3498db;">--:--:--</div>
+            </div>
+        </div>
+
         <div class="wave-card">
             <div class="wave-header">
                 <span class="wave-label">〰 Next Noise Wave</span>
