@@ -39,8 +39,9 @@ chrome.runtime.onInstalled.addListener(async () => {
     });
 
     // Schedule the first persona rotation (2 hours)
-    chrome.alarms.get(PERSONA_ALARM_NAME, (existing) => {
-        if (!existing) {
+    chrome.alarms.get(PERSONA_ALARM_NAME, async (existing) => {
+        const storedTime = await StorageManager.get('nextPersonaRotationTime');
+        if (!existing || !storedTime) {
             scheduleNextPersonaRotation();
         }
     });
