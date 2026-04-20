@@ -1,0 +1,15 @@
+# Chrome browser profile data (used for automation/testing, not source code)
+auto_run_profile/
+auto_run_profile_v2/
+debug_profile/
+
+# Build artifacts
+*.pyc
+__pycache__/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Contains hardcoded API key — never commit this file
+phishing_detector.js
