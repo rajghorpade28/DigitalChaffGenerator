@@ -90,6 +90,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }).catch(() => sendResponse({ nextWaveTime: null }));
         return true;
     }
+
+    if (request.action === "TRIGGER_PASSIVE_WAVE") {
+        console.log('[DCG] Manual passive wave trigger received.');
+        SessionManager.startSession();
+        scheduleNextWave();
+        sendResponse({ success: true });
+        return false;
+    }
     
     if (request.type === "SET_PERSONA") {
         chrome.storage.local.set({ currentPersona: request.persona }).then(() => {

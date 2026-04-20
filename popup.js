@@ -172,13 +172,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         waveStatusEl.textContent = '〰 Launching passive noise session…';
         waveStatusEl.style.display = 'block';
 
-        // Tell background to fire a session now
-        chrome.runtime.sendMessage({ action: 'FORCE_START' });
-
-        // Reschedule the alarm via storage so countdown resets
-        const nextWaveTime = Date.now() + 120 * 60 * 1000;
-        await StorageManager.set('nextWaveTime', nextWaveTime);
-        await updateWaveCountdown();
+        // Tell background to fire a passive wave now
+        chrome.runtime.sendMessage({ action: 'TRIGGER_PASSIVE_WAVE' }, async () => {
+            // Update UI after background has rescheduled the nextWaveTime
+            await updateWaveCountdown();
+        });
 
         setTimeout(() => {
             waveStatusEl.style.display = 'none';
