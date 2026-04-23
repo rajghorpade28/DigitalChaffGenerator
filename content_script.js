@@ -1,5 +1,8 @@
 console.log("[DCG Content Script] Loaded.");
 
+// (Fingerprint spoofing logic moved to inject.js to bypass CSP restrictions)
+
+// ── Message Listener ─────────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "STOP_SIMULATION") {
         console.log("[DCG Content Script] Received STOP signal - halting simulation.");

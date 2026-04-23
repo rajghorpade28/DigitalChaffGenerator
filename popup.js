@@ -1,4 +1,4 @@
-import { StorageManager } from './storage.js';
+﻿import { StorageManager } from './storage.js';
 import { classifyAll, getCleanupTargets, isEssentialCookie, isFirstParty } from './cookie_classifier.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -64,68 +64,63 @@ document.addEventListener("DOMContentLoaded", async () => {
     function updateView(data) {
         const isEnabled = data.isEnabled || false;
         isCurrentlyEnabled = isEnabled;
-        
-        toggleBtn.textContent = isEnabled ? "Stop Generator" : "Start Generator";
-        toggleBtn.className = isEnabled ? "btn active" : "btn";
-        
-        countdownContainer.style.display = isEnabled ? "block" : "none";
-        
-        if (isEnabled) {
-            async function updateStatus() {
-                try {
-                    // Helper for timeout-based messaging
-                    const sendMessageWithTimeout = (message, timeout = 2500) => {
-                        return Promise.race([
-                            chrome.runtime.sendMessage(message),
-                            new Promise((_, reject) => setTimeout(() => reject(new Error('Handshake timeout')), timeout))
-                        ]);
-                    };
 
-                    const status = await sendMessageWithTimeout({ type: 'GET_STATUS' });
-                    
-                    if (status) {
-                        statusText.innerText = status.isActive ? "🟢 Active" : "🔴 Idle";
-                        statusIndicator.style.background = status.isActive ? "#27ae60" : "#e74c3c";
-                        statusIndicator.classList.remove('pulse');
-                        toggleBtn.innerText = status.isActive ? "Stop Generator" : "Start Generator";
-                    }
-                } catch (err) {
-                    console.error('Handshake failed:', err);
-                    statusText.innerText = "🔴 System Offline";
-                    statusIndicator.style.background = "#95a5a6";
-                }
-            }
-            updateStatus();
+        // ── Main toggle button (Start when off)
+        toggleBtn.textContent = 'Start Generator';
+        toggleBtn.className   = 'btn';
+        toggleBtn.style.flex  = '1';
+
+        // ── Stop button (visible only when enabled)
+        const stopBtn = document.getElementById('stopGeneratorBtn');
+        if (stopBtn) stopBtn.style.display = isEnabled ? 'block' : 'none';
+
+        countdownContainer.style.display = isEnabled ? 'block' : 'none';
+
+        if (isEnabled) {
+            statusText.textContent = '🟢 Generator Active';
+            statusIndicator.style.background = '#27ae60';
         } else {
-            statusText.textContent = "System Disabled";
-            statusIndicator.style.background = "#e74c3c";
-            statusIndicator.style.boxShadow = "0 0 8px #e74c3c";
+            statusText.textContent = 'System Disabled';
+            statusIndicator.style.background = '#e74c3c';
+            statusIndicator.style.boxShadow = '0 0 8px #e74c3c';
         }
 
-        sessionCount.textContent = data.sessionsCount || 0;
-        entropyScore.textContent = data.entropy !== undefined ? data.entropy.toFixed(2) : "0.00";
-        certaintyScore.textContent = (data.certainty !== undefined ? data.certainty.toFixed(1) : "100.0") + "%";
+        sessionCount.textContent  = data.sessionsCount || 0;
+        entropyScore.textContent  = data.entropy !== undefined ? data.entropy.toFixed(2) : '0.00';
+        certaintyScore.textContent = (data.certainty !== undefined ? data.certainty.toFixed(1) : '100.0') + '%';
     }
 
     const data = await StorageManager.getMultiple(null);
     updateView(data);
 
-    const btn = document.getElementById("toggleBtn");
- 
-    btn.addEventListener("click", () => {
-        const newState = !isCurrentlyEnabled;
-        chrome.runtime.sendMessage(
-            { action: "TOGGLE_ENABLED", isEnabled: newState }
-        );
+    // ── Start button
+    const btn = document.getElementById('toggleBtn');
+    btn.addEventListener('click', () => {
+        if (!isCurrentlyEnabled) {
+            chrome.runtime.sendMessage({ action: 'TOGGLE_ENABLED', isEnabled: true });
+        }
     });
+
+    // ── Stop button
+    const stopGeneratorBtn = document.getElementById('stopGeneratorBtn');
+    if (stopGeneratorBtn) {
+        stopGeneratorBtn.addEventListener('click', () => {
+            stopGeneratorBtn.textContent = 'Stopping…';
+            stopGeneratorBtn.disabled = true;
+            chrome.runtime.sendMessage({ action: 'STOP_GENERATOR' }, () => {
+                stopGeneratorBtn.textContent = '‖‖ Stop';
+                stopGeneratorBtn.disabled = false;
+                stopGeneratorBtn.style.display = 'none';
+            });
+        });
+    }
 
     const closeNoiseBtn = document.getElementById('closeNoiseBtn');
     closeNoiseBtn.addEventListener('click', () => {
         const originalText = closeNoiseBtn.textContent;
         closeNoiseBtn.textContent = 'Closing...';
         closeNoiseBtn.disabled = true;
-
-        chrome.runtime.sendMessage({ type: "CLOSE_NOISE_TABS" }, (response) => {
+        chrome.runtime.sendMessage({ type: 'CLOSE_NOISE_TABS' }, () => {
             setTimeout(() => {
                 closeNoiseBtn.textContent = originalText;
                 closeNoiseBtn.disabled = false;
@@ -136,6 +131,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     chrome.storage.onChanged.addListener((changes, namespace) => {
         if (namespace === 'local') {
             StorageManager.getMultiple(null).then(allData => updateView(allData));
+            // Re-render history if it changed
+            if (changes.urlHistory) renderHistory(changes.urlHistory.newValue || []);
         }
     });
 
@@ -424,18 +421,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     const RISK_BADGE_CLASS = { LOW: 'low', MEDIUM: 'medium', HIGH: 'high', UNKNOWN: 'unknown' };
     const RISK_BADGE_TEXT  = { LOW: '✓ Low Risk', MEDIUM: '⚡ Medium Risk', HIGH: '🚨 High Risk', UNKNOWN: '— Unknown' };
 
-    /** Update the current-page risk badge in the popup. */
-    function setCurrentRisk(risk, url, reason) {
+    // Colour map for the mini dual-panel badges
+    const RISK_COLOR = {
+        HIGH:    '#e74c3c',
+        MEDIUM:  '#f39c12',
+        LOW:     '#2ecc71',
+        UNKNOWN: '#a0aebf',
+        null:    '#a0aebf'
+    };
+
+    /** Update the current-page risk badge and both dual-auth panels. */
+    function setCurrentRisk(risk, url, reason, mlRisk, mlReason, googleRisk, googleReason) {
         const level = risk || 'UNKNOWN';
         phishCurrentRisk.textContent = RISK_BADGE_TEXT[level] || level;
         phishCurrentRisk.className   = `phish-risk-badge ${RISK_BADGE_CLASS[level] || 'unknown'}`;
-        
-        // Show reason for unknown/errors
-        if (level === 'UNKNOWN' && reason) {
-            phishCurrentReason.textContent = reason;
-        } else {
-            phishCurrentReason.textContent = '';
-        }
+
+        // Subtitle reason shown only for UNKNOWN / error states
+        phishCurrentReason.textContent = (level === 'UNKNOWN' && reason) ? reason : '';
 
         if (url) {
             try {
@@ -444,16 +446,60 @@ document.addEventListener("DOMContentLoaded", async () => {
                 phishCurrentUrl.textContent = url.slice(0, 60);
             }
         }
+
+        // ── Google panel
+        const googleBadge  = document.getElementById('googleRiskBadge');
+        const googleReasonEl = document.getElementById('googleRiskReason');
+        if (googleBadge && googleReasonEl) {
+            const gRisk = googleRisk || null;
+            if (gRisk) {
+                googleBadge.textContent  = RISK_BADGE_TEXT[gRisk] || gRisk;
+                googleBadge.style.color  = RISK_COLOR[gRisk];
+                googleReasonEl.textContent = googleReason || '';
+            } else {
+                googleBadge.textContent  = 'No API key';
+                googleBadge.style.color  = '#a0aebf';
+                googleReasonEl.textContent = 'Add key for live checks';
+            }
+        }
+
+        // ── ML panel
+        const mlBadge    = document.getElementById('mlRiskBadge');
+        const mlReasonEl = document.getElementById('mlRiskReason');
+        if (mlBadge && mlReasonEl) {
+            const mRisk = mlRisk || level;
+            mlBadge.textContent  = RISK_BADGE_TEXT[mRisk] || mRisk;
+            mlBadge.style.color  = RISK_COLOR[mRisk] || RISK_COLOR.UNKNOWN;
+            // Shorten the reason text (strip "Local ML: " prefix if present)
+            const shortReason = (mlReason || reason || '').replace('Local ML: ', '');
+            mlReasonEl.textContent = shortReason || 'XGBoost · 92.00%';
+        }
+
+        // Also update the ML status strip when in privacy mode
+        const mlStatusText = document.getElementById('mlStatusText');
+        if (mlStatusText) {
+            const mRisk = mlRisk || level;
+            mlStatusText.textContent = mRisk !== 'UNKNOWN'
+                ? `Last: ${RISK_BADGE_TEXT[mRisk] || mRisk}`
+                : 'Offline · No external calls.';
+            mlStatusText.style.color = RISK_COLOR[mRisk] || '#3498db';
+        }
     }
 
-    /** Reflect the active mode in segmented buttons and footnote. */
+    /** Reflect the active mode in segmented buttons and panels. */
     function applyPhishMode(mode) {
         const isAccurate = mode === 'accurate';
         phishAccurateBtn.classList.toggle('selected', isAccurate);
         phishPrivacyBtn.classList.toggle('selected', !isAccurate);
         phishModeNote.textContent = isAccurate
-            ? 'Accurate mode: every URL checked via Google Safe Browsing API.'
-            : 'Privacy mode: local checks only — no external calls.';
+            ? 'Accurate mode: Google Safe Browsing + Local ML dual check.'
+            : 'Local ML mode: offline prediction via trained XGBoost.';
+
+        // Show/hide the two different info areas
+        const dualAuthSection = document.getElementById('dualAuthSection');
+        const mlInfoSection   = document.getElementById('mlInfoSection');
+        if (dualAuthSection) dualAuthSection.style.display = isAccurate ? 'flex' : 'none';
+        if (mlInfoSection)   mlInfoSection.style.display   = isAccurate ? 'none' : 'block';
     }
 
     // Load saved mode on popup open
@@ -476,7 +522,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             setCurrentRisk('UNKNOWN', null, 'Connection error');
             return;
         }
-        if (result) setCurrentRisk(result.risk, result.url, result.reason);
+        if (result) setCurrentRisk(
+            result.risk, result.url, result.reason,
+            result.mlRisk, result.mlReason,
+            result.googleRisk, result.googleReason
+        );
     });
 
     // Mode buttons
@@ -484,18 +534,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         await chrome.storage.local.set({ phishingMode: 'accurate' });
         applyPhishMode('accurate');
         console.log('[DCG] Phishing mode set: accurate');
-        // Trigger a fresh check
         chrome.runtime.sendMessage({ type: 'CHECK_CURRENT_URL' }, (res) => {
-            if (res) setCurrentRisk(res.risk, res.url, res.reason);
+            if (res) setCurrentRisk(
+                res.risk, res.url, res.reason,
+                res.mlRisk, res.mlReason,
+                res.googleRisk, res.googleReason
+            );
         });
     });
     phishPrivacyBtn.addEventListener('click', async () => {
         await chrome.storage.local.set({ phishingMode: 'privacy' });
         applyPhishMode('privacy');
         console.log('[DCG] Phishing mode set: privacy');
-        // Trigger a fresh check
         chrome.runtime.sendMessage({ type: 'CHECK_CURRENT_URL' }, (res) => {
-            if (res) setCurrentRisk(res.risk, res.url, res.reason);
+            if (res) setCurrentRisk(
+                res.risk, res.url, res.reason,
+                res.mlRisk, res.mlReason,
+                res.googleRisk, res.googleReason
+            );
         });
     });
 
@@ -510,7 +566,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Listen for live updates from background (Phishing alerts and Persona Rotation)
     chrome.runtime.onMessage.addListener((msg) => {
         if (msg.type === 'PHISHING_ALERT') {
-            setCurrentRisk(msg.risk, msg.url, msg.reason);
+            setCurrentRisk(
+                msg.risk, msg.url, msg.reason,
+                msg.mlRisk, msg.mlReason,
+                msg.googleRisk, msg.googleReason
+            );
             phishAlertUrl.textContent    = msg.url;
             phishAlertReason.textContent = `${msg.risk} \u2014 ${msg.reason}`;
             phishAlertEl.style.display   = 'block';
@@ -526,6 +586,64 @@ document.addEventListener("DOMContentLoaded", async () => {
         phishAlertEl.style.display = 'none';
         chrome.storage.local.remove('lastPhishingAlert');
     });
+
+    // ── URL Detection History ───────────────────────────────────────────────
+    const historyContainer = document.getElementById('urlHistoryList');
+    const clearHistoryBtn  = document.getElementById('clearHistoryBtn');
+
+    const HISTORY_RISK_COLOR = {
+        HIGH:    '#e74c3c',
+        MEDIUM:  '#f39c12',
+        LOW:     '#2ecc71',
+        UNKNOWN: '#a0aebf'
+    };
+
+    function renderHistory(entries) {
+        if (!historyContainer) return;
+        if (!entries || entries.length === 0) {
+            historyContainer.innerHTML = '<div style="text-align:center;color:#a0aebf;font-size:11px;padding:16px 0;">No URLs checked yet.</div>';
+            return;
+        }
+
+        historyContainer.innerHTML = entries.map(entry => {
+            const riskColor = HISTORY_RISK_COLOR[entry.risk] || '#a0aebf';
+            const time = new Date(entry.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            let hostname = entry.url || '';
+            try { hostname = new URL(entry.url).hostname; } catch {}
+
+            const googleInfo = entry.googleRisk
+                ? `<span style="color:#1abc9c;">G:${entry.googleRisk}</span>`
+                : `<span style="color:#666;">G:—</span>`;
+            const mlInfo = entry.mlRisk
+                ? `<span style="color:#3498db;">ML:${entry.mlRisk}</span>`
+                : '';
+
+            return `
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11px;">
+                <span style="width:8px;height:8px;border-radius:50%;background:${riskColor};flex-shrink:0;display:inline-block;"></span>
+                <div style="flex:1;overflow:hidden;">
+                    <div style="font-weight:600;color:#e0e6ef;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${entry.url}">${hostname}</div>
+                    <div style="color:#a0aebf;margin-top:1px;">${googleInfo} &nbsp;${mlInfo}</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                    <span style="color:${riskColor};font-weight:700;">${entry.risk}</span>
+                    <div style="color:#666;font-size:10px;">${time}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // Load history on popup open
+    const { urlHistory } = await chrome.storage.local.get('urlHistory');
+    renderHistory(urlHistory || []);
+
+    // Clear history button
+    if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener('click', async () => {
+            await chrome.storage.local.remove('urlHistory');
+            renderHistory([]);
+        });
+    }
 
 });
 

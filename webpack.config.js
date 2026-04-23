@@ -8,6 +8,7 @@ module.exports = {
   entry: {
     background: './background.js',
     content: './content_script.js',
+    inject: './inject.js',
     popup: './popup.js',
     behavior_simulator: './behavior_simulator.js'
   },

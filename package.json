@@ -7,17 +7,9 @@
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rajghorpade28/dcg.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/rajghorpade28/dcg/issues"
-  },
-  "homepage": "https://github.com/rajghorpade28/dcg#readme",
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.2",
@@ -28,5 +20,13 @@
     "webpack": "^5.106.2",
     "webpack-cli": "^7.0.2",
     "webpack-obfuscator": "^3.6.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajghorpade28/dcg.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rajghorpade28/dcg/issues"
+  },
+  "homepage": "https://github.com/rajghorpade28/dcg#readme"
 }

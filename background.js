@@ -2,6 +2,7 @@ import { Scheduler } from './scheduler.js';
 import { StorageManager } from './storage.js';
 import { SessionManager } from './session_manager.js';
 import { PhishingDetector } from './phishing_detector.js';
+import { TaskStateManager } from './task_state_manager.js';
 
 const PASSIVE_ALARM_NAME = 'passiveWave';
 const PERSONA_ALARM_NAME = 'personaRotation';
@@ -39,9 +40,8 @@ chrome.runtime.onInstalled.addListener(async () => {
     });
 
     // Schedule the first persona rotation (2 hours)
-    chrome.alarms.get(PERSONA_ALARM_NAME, async (existing) => {
-        const storedTime = await StorageManager.get('nextPersonaRotationTime');
-        if (!existing || !storedTime) {
+    chrome.alarms.get(PERSONA_ALARM_NAME, (existing) => {
+        if (!existing) {
             scheduleNextPersonaRotation();
         }
     });
@@ -51,8 +51,8 @@ chrome.runtime.onInstalled.addListener(async () => {
 // Configure rapid idle detection (minimum 15 seconds)
 chrome.idle.setDetectionInterval(30);
 Scheduler.init();
-SessionManager.init();
-PhishingDetector.init(); // ── Phishing URL detection (non-blocking)
+SessionManager.init();          // async — loads dead-URL blacklist then registers listeners
+PhishingDetector.init();        // ── Phishing URL detection (non-blocking)
 
 // ── Passive waves and Persona Rotation alarm handler ────────────────────────
 chrome.alarms.onAlarm.addListener(async (alarm) => {
@@ -104,6 +104,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return false;
     }
 
+    if (request.action === "STOP_GENERATOR") {
+        console.log('[DCG] STOP_GENERATOR received — halting all noise generation.');
+        StorageManager.set('isEnabled', false).then(async () => {
+            Scheduler.stop();
+            await SessionManager.endSession(/* isStopped */ true);
+            sendResponse({ success: true });
+        }).catch(err => sendResponse({ success: false, error: err.message }));
+        return true;
+    }
+
     if (request.action === "GET_NEXT_WAVE") {
         StorageManager.get('nextWaveTime').then(t => {
             sendResponse({ nextWaveTime: t || null });
@@ -145,6 +155,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 }
                 console.log('[DCG] CHECK_CURRENT_URL: Running new check...');
                 const result = await PhishingDetector.checkUrl(tab.url, tab.id);
+                
+                // Save it to cache so it shows in history
+                if (result) {
+                    const cacheToSave = tabRiskCache || {};
+                    cacheToSave[tab.id] = { url: tab.url, ...result, ts: Date.now() };
+                    await chrome.storage.local.set({ tabRiskCache: cacheToSave });
+                }
+
                 sendResponse({ url: tab.url, ...(result || { risk: 'UNKNOWN', reason: 'Analysis failed' }) });
             } catch (err) {
                 console.error('[DCG] Async URL check exception:', err);

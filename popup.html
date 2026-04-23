@@ -30,10 +30,19 @@
                 <option value="finance_planner">finance_planner</option>
                 <option value="travel_dreamer">travel_dreamer</option>
             </select>
+            <div style="font-size: 11px; color: #a0aebf; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <span>🔄 Next Rotation in:</span>
+                <span id="personaRotationTimer" style="font-weight: 700; color: #3498db; font-family: 'Courier New', Courier, monospace;">--:--:--</span>
+                <span style="font-size: 9px; background: rgba(52, 152, 219, 0.1); color: #3498db; padding: 1px 5px; border-radius: 10px; margin-left: 5px;">Every 2 hrs</span>
+            </div>
         </div>
 
-        <button id="toggleBtn" class="btn">Start Generator</button>
-        <button id="closeNoiseBtn" class="btn btn-secondary" style="margin-top: -12px; margin-bottom: 24px;">Close Noise Tab</button>
+        <!-- Generator Control Buttons -->
+        <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+            <button id="toggleBtn" class="btn" style="flex: 1;">Start Generator</button>
+            <button id="stopGeneratorBtn" class="btn" style="flex: 1; background: linear-gradient(135deg, #c0392b, #e74c3c); display: none;">&#9646;&#9646; Stop</button>
+        </div>
+        <button id="closeNoiseBtn" class="btn btn-secondary" style="margin-top: -16px; margin-bottom: 24px; width: 100%;">Close Noise Tab</button>
 
         <h3 class="metrics-title">Current Profile Metrics</h3>
         <div class="metrics-grid">
@@ -51,17 +60,7 @@
             </div>
         </div>
 
-        <h3 class="metrics-title">Autonomous Schedules</h3>
-        <div class="wave-card" style="margin-bottom: 12px;">
-            <div class="wave-header">
-                <span class="wave-label">🎭 Next Identity Shift</span>
-                <span class="wave-mode-pill" style="background: rgba(52, 152, 219, 0.1); color: #3498db;">Every 2 hrs</span>
-            </div>
-            <div class="wave-timer-row" style="justify-content: center;">
-                <div id="personaRotationTimer" class="wave-timer" style="color: #3498db;">--:--:--</div>
-            </div>
-        </div>
-
+        <!-- ── Passive Wave Countdown ─────────────────────────────── -->
         <div class="wave-card">
             <div class="wave-header">
                 <span class="wave-label">〰 Next Noise Wave</span>
@@ -83,7 +82,7 @@
 
             <!-- Current page risk -->
             <div class="phish-current-row">
-                <div class="phish-current-label">Current page</div>
+                <div class="phish-current-label">CURRENT PAGE</div>
                 <div style="text-align: right;">
                     <div id="phishCurrentRisk" class="phish-risk-badge unknown">Checking…</div>
                     <div id="phishCurrentReason" class="phish-reason-sub"></div>
@@ -93,12 +92,35 @@
 
             <!-- Mode selector -->
             <div class="phish-mode-row">
-                <button id="phishModeAccurate" class="phish-mode-btn selected" title="Use Google Safe Browsing API">
+                <button id="phishModeAccurate" class="phish-mode-btn selected" title="Google Safe Browsing API + ML">
                     🌐 Accurate
                 </button>
-                <button id="phishModePrivacy" class="phish-mode-btn" title="Local checks only — no external calls">
-                    🔒 Privacy
+                <button id="phishModePrivacy" class="phish-mode-btn" title="Local ML only — no external calls">
+                    🤖 Local ML
                 </button>
+            </div>
+
+            <!-- Dual Authentication Results (shown in Accurate mode) -->
+            <div id="dualAuthSection" style="margin-top: 10px; display: flex; gap: 8px;">
+                <!-- Google Safe Browsing panel -->
+                <div style="flex:1; background: rgba(26,188,156,0.08); border: 1px solid rgba(26,188,156,0.25); border-radius: 8px; padding: 8px; font-size: 11px; text-align: center;">
+                    <div style="font-weight: 700; color: #1abc9c; margin-bottom: 5px;">🌐 Google</div>
+                    <div id="googleRiskBadge" style="font-size: 12px; font-weight: 700; color: #a0aebf;">—</div>
+                    <div id="googleRiskReason" style="font-size: 10px; color: #a0aebf; margin-top: 3px; line-height: 1.3;">Waiting…</div>
+                </div>
+                <!-- Local ML panel -->
+                <div style="flex:1; background: rgba(52,152,219,0.08); border: 1px solid rgba(52,152,219,0.25); border-radius: 8px; padding: 8px; font-size: 11px; text-align: center;">
+                    <div style="font-weight: 700; color: #3498db; margin-bottom: 5px;">🧠 Local ML</div>
+                    <div id="mlRiskBadge" style="font-size: 12px; font-weight: 700; color: #a0aebf;">—</div>
+                    <div id="mlRiskReason" style="font-size: 10px; color: #a0aebf; margin-top: 3px; line-height: 1.3;">XGBoost · 98.86%</div>
+                </div>
+            </div>
+
+            <!-- ML-only info strip (shown in Local ML mode) -->
+            <div id="mlInfoSection" style="display: none; margin-top: 10px; background: rgba(52, 152, 219, 0.1); padding: 8px; border-radius: 6px; font-size: 11px; color: #3498db; text-align: center; border: 1px solid rgba(52, 152, 219, 0.2);">
+                <div style="font-weight: bold; margin-bottom: 4px;">🧠 ML Inference Engine</div>
+                <strong>Model:</strong> XGBoost Classifier &nbsp;·&nbsp; <strong>Accuracy:</strong> 98.86%<br>
+                <span id="mlStatusText">Offline · No external calls.</span>
             </div>
 
             <!-- Threat alert banner (hidden by default) -->
@@ -109,7 +131,7 @@
                 <button id="phishAlertDismiss" class="phish-alert-dismiss">Dismiss</button>
             </div>
 
-            <div class="phish-footnote" id="phishModeNote">Accurate mode uses Google Safe Browsing API.</div>
+            <div class="phish-footnote" id="phishModeNote">Accurate mode: Google Safe Browsing + Local ML dual check.</div>
         </div>
 
         <!-- ── Cookie Manager ─────────────────────────────────── -->
@@ -155,9 +177,18 @@
                 <!-- rendered by popup.js -->
             </div>
         </div>
+        <!-- ── URL Detection History ──────────────────────────────── -->
+        <div class="phish-card" style="margin-top: 16px;">
+            <div class="phish-header">
+                <span class="phish-title">📜 URL Detection History</span>
+                <button id="clearHistoryBtn" style="background: none; border: none; color: #e74c3c; font-size: 11px; cursor: pointer; font-weight: 600; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(231,76,60,0.4);">Clear</button>
+            </div>
+            <div id="urlHistoryList" style="max-height: 220px; overflow-y: auto; margin-top: 8px;">
+                <div style="text-align: center; color: #a0aebf; font-size: 11px; padding: 16px 0;">No URLs checked yet.</div>
+            </div>
+        </div>
 
         <div class="info-footer">
-
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
             Operates exclusively when the user is idle.
         </div>

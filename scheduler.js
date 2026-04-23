@@ -38,8 +38,8 @@ export const Scheduler = {
 
         await SessionManager.startSession();
         
-        // Wait to trigger the next session (after 4 mins guarantees max 1 session limit constraint isn't stacked)
-        const nextStartDelayMs = 240000;
+        // Wait to trigger the next session (after 1 min instead of 4 mins for more frequent noise)
+        const nextStartDelayMs = 60000;
         setTimeout(() => {
             if (this.isRunning) {
                 this.loop();
