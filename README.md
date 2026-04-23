@@ -2,7 +2,6 @@
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?style=for-the-badge)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-orange.svg?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Chrome-lightgrey.svg?style=for-the-badge)
 
 > **"If they're tracking you, give them garbage."**
@@ -77,26 +76,11 @@ npm run build
 
 ---
 
-## 🧠 Architecture Overview
+## 🧠 Architecture & System Design
 
-```mermaid
-graph TD
-    A[Scheduler] -->|Trigger| B[Persona Engine]
-    B -->|Pick Site| C[Session Manager]
-    C -->|Open Tab| D[Noise Tab]
-    D -->|Inject| E[Fingerprint Spoofing]
-    D -->|Inject| F[Behavior Simulator]
-    F -->|Actions| G[Chaff Generation]
-    D -->|Analyze| H[Phishing Detector]
-    H -->|Local ML| I[XGBoost]
-    H -->|Cloud API| J[Google Safe Browsing]
-```
+![Detailed Architecture](assets/architecture_detailed.jpg)
 
----
-
-## ⚖️ License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+![System Flow](assets/architecture_flow.jpg)
 
 ---
 
