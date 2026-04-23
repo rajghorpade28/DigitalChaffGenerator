@@ -48,7 +48,7 @@ function clearBadge(tabId) {
 // Uses the Google Safe Browsing v4 Lookup API. The API key is intentionally
 // left as a placeholder — the user should obtain a free key from:
 // https://developers.google.com/safe-browsing/v4/get-started
-const SAFE_BROWSING_API_KEY = ''; // <-- Paste your Google Safe Browsing API key here
+const SAFE_BROWSING_API_KEY = process.env.SAFE_BROWSING_API_KEY || ''; // <-- Paste your Google Safe Browsing API key here
 
 async function checkWithGoogleSafeBrowsing(url) {
     // If no API key is configured, return null to signal fallback to ML

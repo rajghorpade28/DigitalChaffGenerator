@@ -2,6 +2,7 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const WebpackObfuscator = require('webpack-obfuscator');
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   mode: 'production',
@@ -64,7 +65,8 @@ module.exports = {
       deadCodeInjection: false,     // Disabled for stability in extensions
       compact: true,
       unicodeEscapeSequence: false
-    }, ['background.bundle.js', 'behavior_simulator.bundle.js'])
+    }, ['background.bundle.js', 'behavior_simulator.bundle.js']),
+    new Dotenv()
   ],
   resolve: {
     extensions: ['.js']
