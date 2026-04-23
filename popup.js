@@ -1,4 +1,4 @@
-﻿import { StorageManager } from './storage.js';
+import { StorageManager } from './storage.js';
 import { classifyAll, getCleanupTargets, isEssentialCookie, isFirstParty } from './cookie_classifier.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -456,6 +456,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 googleBadge.textContent  = RISK_BADGE_TEXT[gRisk] || gRisk;
                 googleBadge.style.color  = RISK_COLOR[gRisk];
                 googleReasonEl.textContent = googleReason || '';
+            } else if (reason === 'Browser internal URL') {
+                googleBadge.textContent  = '— Unknown';
+                googleBadge.style.color  = '#a0aebf';
+                googleReasonEl.textContent = 'System page or blank';
             } else {
                 googleBadge.textContent  = 'No API key';
                 googleBadge.style.color  = '#a0aebf';
@@ -470,9 +474,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             const mRisk = mlRisk || level;
             mlBadge.textContent  = RISK_BADGE_TEXT[mRisk] || mRisk;
             mlBadge.style.color  = RISK_COLOR[mRisk] || RISK_COLOR.UNKNOWN;
-            // Shorten the reason text (strip "Local ML: " prefix if present)
-            const shortReason = (mlReason || reason || '').replace('Local ML: ', '');
-            mlReasonEl.textContent = shortReason || 'XGBoost · 92.00%';
+            
+            if (reason === 'Browser internal URL' && !mlRisk) {
+                mlReasonEl.textContent = 'System page or blank';
+            } else {
+                // Shorten the reason text (strip "Local ML: " prefix if present)
+                const shortReason = (mlReason || reason || '').replace('Local ML: ', '');
+                mlReasonEl.textContent = shortReason || 'XGBoost · 98.86%';
+            }
         }
 
         // Also update the ML status strip when in privacy mode
