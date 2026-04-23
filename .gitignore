@@ -30,3 +30,6 @@ classified_urls_summary.txt
 
 # Large dataset
 PhiUSIIL_Phishing_URL_Dataset.csv
+
+# Environment Variables
+.env
