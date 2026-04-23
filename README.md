@@ -1,111 +1,106 @@
-# Digital Chaff Generator (DCG)
+# 🛡️ Digital Chaff Generator (DCG)
 
-> A privacy-focused Chrome extension that fights browser fingerprinting by generating realistic background browsing "noise" when you're idle — making it impossible for trackers to build an accurate profile of your online behaviour.
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?style=for-the-badge)
+![Manifest](https://img.shields.io/badge/Manifest-V3-orange.svg?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
+![Platform](https://img.shields.io/badge/Platform-Chrome-lightgrey.svg?style=for-the-badge)
 
----
-
-## What It Does
-
-Digital Chaff Generator (DCG) runs silently in the background. When your system is idle, it:
-
-1. **Selects a persona** (Tech Curious, Health Conscious, Finance Planner, Travel Dreamer) and opens a persona-appropriate website in a background tab — invisible to you.
-2. **Simulates realistic human behaviour** — scrolling at human reading speed, occasional back-scrolls, and frequent internal link clicks to dig deep into sites.
-3. **Injects Fingerprint Spoofing** — Disrupts tracking scripts by injecting noise into Canvas rendering APIs and spoofing WebGL vendor/renderer strings.
-4. **Closes the tab automatically** the moment the simulation finishes.
-5. **Checks every URL for phishing** using two independent engines:
-   - **Google Safe Browsing API** (live, cloud-based — requires a free API key)
-   - **Local XGBoost ML model** (offline, highly accurate 98.86%, no external calls)
-6. **Learns from dead links** — failing URLs are permanently blacklisted, ensuring noise generation stays efficient.
+> **"If they're tracking you, give them garbage."**
+> 
+> Digital Chaff Generator (DCG) is a premium privacy-defense tool that fights browser fingerprinting by generating high-fidelity background browsing "noise." By simulating realistic human behavior on a rotating set of personas, it effectively pollutes the data profiles trackers attempt to build on you.
 
 ---
 
-## Architecture
+## 🚀 Key Features
 
-```
-malicious_phish.csv
-      │
-      ▼
-classify_dataset_urls.py  ──► site_selector.js   (80 URLs × 5 personas)
-train_models.py           ──► best_model.json    (XGBoost model)
-best_model.json           ──► phishing_detector.js (embedded ML inference)
-```
-
-```
-Chrome Extension (Manifest V3)
-├── background.js          Service worker — orchestrates everything
-├── scheduler.js           Alarm-based passive wave timer (1-minute intervals)
-├── session_manager.js     Tab lifecycle: open → simulate → close
-├── site_selector.js       Dataset URL pool + dead-URL blacklist
-├── persona_engine.js      Persona rotation
-├── behavior_simulator.js  Human-like scroll/click simulation 
-├── content_script.js      Fingerprint spoofing injection + message listener
-├── phishing_detector.js   Dual ML + Safe Browsing engine + URL History
-├── metrics_engine.js      Entropy / profile certainty scoring
-├── cookie_classifier.js   Cookie analysis and cleanup
-├── warning_ui.js          In-page phishing warning overlay
-├── popup.html / popup.js  Extension dashboard UI
-└── styles.css             Dashboard styling
-```
+*   🎭 **Persona-Driven Noise**: Automatically rotates between 5 distinct personas (*Tech, Health, Finance, Travel, News*) every 2 hours.
+*   🤖 **Human Simulation**: Advanced behavior engine that scrolls, moves the mouse, and selects text to mimic real human reading patterns.
+*   🧭 **Deep Exploration**: Not just page loads—the extension clicks internal links to explore sites deeply, generating more complex tracking "chaff."
+*   🛡️ **Dual-Engine Phishing Protection**: 
+    *   **Cloud**: Live Google Safe Browsing API integration.
+    *   **Local**: Offline XGBoost ML model (98.86% accuracy) for instant URL analysis.
+*   🧬 **Fingerprint Spoofing**: Active disruption of Canvas and WebGL fingerprinting scripts via noise injection.
+*   🧹 **Smart Cookie Cleanup**: Risk-based cookie management with three selectable intensity levels.
+*   📉 **Profile Certainty Metrics**: Real-time visualization of your "anonymity score" based on generated noise volume.
 
 ---
 
-## Features
+## 🛠️ Technical Stack
 
-| Feature | Details |
-|---------|---------|
-| 🎭 **Persona-based browsing** | 5 personas (tech, health, finance, travel, news), auto-rotates every 2 hrs |
-| 🛡️ **Fingerprint Protection** | Spoofs Canvas rendering (noise injection) and WebGL identifiers |
-| 🌐 **Dataset-driven URLs** | Benign URLs from `malicious_phish.csv`, 80 per persona |
-| 🔁 **Aggressive Noise** | Sessions trigger every minute to rapidly generate tracking noise |
-| ☠️ **Dead URL blacklist** | Failing URLs are permanently removed from the pool |
-| 🛡️ **Dual phishing detection** | Google Safe Browsing + Local ML XGBoost run on every URL |
-| 📜 **URL history** | Last 50 checked URLs shown in dashboard |
-| ⏹️ **Stop Generator button** | Instantly halts all noise generation and closes open noise tabs |
-| 🍪 **Cookie manager** | Three cleanup modes: Safe, Balanced, Aggressive |
+### Core Extension
+| Technology | Usage |
+| :--- | :--- |
+| **JavaScript (ES6+)** | Core logic, Service Workers, and UI orchestration. |
+| **Manifest V3** | Built on the latest, secure Chrome Extension architecture. |
+| **Webpack 5** | Module bundling, minification, and production optimization. |
+| **Dotenv** | Secure environment variable management for API keys. |
+| **CSS3** | Premium "Light Luxury" UI with glassmorphism and smooth animations. |
 
----
-
-## Installation (Developer Mode)
-
-1. Clone or download this repository.
-2. Open Chrome → navigate to `chrome://extensions/`
-3. Toggle **Developer mode** ON (top-right).
-4. Click **Load unpacked** → select the project folder.
-5. The DCG icon will appear in your Chrome toolbar.
+### Machine Learning
+| Technology | Usage |
+| :--- | :--- |
+| **Python 3.10** | Dataset classification and model training pipeline. |
+| **XGBoost** | High-performance gradient boosting for phishing detection. |
+| **Pandas** | Large-scale data processing for training datasets. |
 
 ---
 
-## Setup: Google Safe Browsing API (Optional)
+## 📦 Installation & Setup
 
-Without an API key, the dashboard falls back to Local ML only.  
-1. Visit [https://console.cloud.google.com/](https://console.cloud.google.com/)
-2. Create a project → enable the **Safe Browsing API**
-3. Generate an **API key**
-4. Open `phishing_detector.js` and paste it into `SAFE_BROWSING_API_KEY`.
-5. Reload the extension.
-
----
-
-## Retraining the ML Model
-
-The XGBoost phishing model (`best_model.json`) was trained on a combination of:
-1. PhiUSIIL Phishing URL Dataset (235,795 URLs)
-2. Legacy `malicious_phish.csv`
-3. Tranco Top-1M legitimate domains (auto-downloaded)
-
-To retrain:
+### 1. Build from Source
+Ensure you have [Node.js](https://nodejs.org/) installed.
 
 ```bash
-pip install pandas scikit-learn xgboost lightgbm requests
-python train_models.py
+# Install dependencies
+npm install
+
+# Create your environment file
+echo "SAFE_BROWSING_API_KEY=YOUR_KEY_HERE" > .env
+
+# Build the production bundle
+npm run build
 ```
 
-This compares XGBoost and LightGBM — then automatically exports the best compact model to `best_model.json` and embeds it directly into `phishing_detector.js`.
+### 2. Load into Chrome
+1.  Open Chrome and navigate to `chrome://extensions/`.
+2.  Enable **Developer mode** (top-right).
+3.  Click **Load unpacked**.
+4.  Select the **`dist`** folder created by the build process.
 
 ---
 
-## Privacy Notes
+## 🛡️ Privacy First
 
-- **No data leaves your device** (except optional Google Safe Browsing API calls).
-- The extension does not track, log, or transmit any of your real browsing activity.
-- Fingerprint spoofing occurs locally inside your browser tabs.
+- **Zero-Knowledge Architecture**: No personal browsing data ever leaves your device.
+- **Local Inference**: The phishing detection ML model runs entirely on your hardware.
+- **No Analytics**: We do not track users. The code is open and transparent.
+
+---
+
+## 🧠 Architecture Overview
+
+```mermaid
+graph TD
+    A[Scheduler] -->|Trigger| B[Persona Engine]
+    B -->|Pick Site| C[Session Manager]
+    C -->|Open Tab| D[Noise Tab]
+    D -->|Inject| E[Fingerprint Spoofing]
+    D -->|Inject| F[Behavior Simulator]
+    F -->|Actions| G[Chaff Generation]
+    D -->|Analyze| H[Phishing Detector]
+    H -->|Local ML| I[XGBoost]
+    H -->|Cloud API| J[Google Safe Browsing]
+```
+
+---
+
+## ⚖️ License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<p align="center">
+  <i>Developed for the privacy-conscious web.</i><br>
+  <b>Digital Chaff Generator &copy; 2026</b>
+</p>
