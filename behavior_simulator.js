@@ -31,7 +31,7 @@
 
     // Simulate erratic, human-like mouse movements
     function simulateMouseMovement() {
-        if (Math.random() > 0.3) return; // Only move occasionally
+        if (Math.random() > 0.9) return; // Only skip 10% of the time (increased frequency)
 
         // Fallbacks in case background tab viewport is 0x0
         const width = window.innerWidth || document.documentElement.clientWidth || 1024;
@@ -92,11 +92,11 @@
     }
 
     async function simulate() {
-        // Hard timeout: force close after 45 seconds to guarantee no hung tabs
+        // Hard timeout: force close after 85 seconds to guarantee no hung tabs
         setTimeout(() => {
             console.log('[DCG Simulator] Hard timeout reached, forcing close.');
             notifyDone();
-        }, 45000);
+        }, 85000);
 
         // Initial pause — let the page fully render
         await sleep(randomInt(2000, 4000));
@@ -104,20 +104,22 @@
 
         const viewportHeight = window.innerHeight;
         let   attempts       = 0;
-        const maxScrolls     = randomInt(6, 12);
+        const startTime      = Date.now();
+        const minRunTime     = 70000; // 70 seconds minimum activity
+        const maxScrolls     = randomInt(20, 40); // Increased scroll count
 
-        while (attempts < maxScrolls && !window.__dcg_stop) {
+        while ((attempts < maxScrolls || (Date.now() - startTime) < minRunTime) && !window.__dcg_stop) {
             // Scroll down to read the next section
             const step = randomInt(viewportHeight * 0.25, viewportHeight * 0.65);
             await customScrollBy(step);
 
-            // Human reading pause + selection
+            // Human reading pause + selection (REDUCED IDLE TIMES)
             simulateMouseMovement();
-            if (Math.random() < 0.4) {
+            if (Math.random() < 0.6) { // Increased selection chance
                 simulateTextSelection();
-                await sleep(randomInt(1000, 2500));
+                await sleep(randomInt(400, 1200));
             } else {
-                await sleep(randomInt(500, 2000));
+                await sleep(randomInt(300, 1000));
             }
 
             // Occasionally scroll back slightly (re-reading)
@@ -126,8 +128,8 @@
                 await sleep(randomInt(300, 1000));
             }
 
-            // Frequently click a safe internal link (50% chance)
-            if (Math.random() < 0.50) {
+            // Frequently click a safe internal link (70% chance - increased)
+            if (Math.random() < 0.70) {
                 const links = Array.from(document.querySelectorAll('a')).filter(a =>
                     a.href &&
                     a.href.startsWith(window.location.origin) &&

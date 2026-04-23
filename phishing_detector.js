@@ -49,6 +49,7 @@ function clearBadge(tabId) {
 // left as a placeholder — the user should obtain a free key from:
 // https://developers.google.com/safe-browsing/v4/get-started
 const SAFE_BROWSING_API_KEY = process.env.SAFE_BROWSING_API_KEY || ''; // <-- Paste your Google Safe Browsing API key here
+console.log('[DCG] Safe Browsing API Key detected:', !!SAFE_BROWSING_API_KEY);
 
 async function checkWithGoogleSafeBrowsing(url) {
     // If no API key is configured, return null to signal fallback to ML
@@ -71,7 +72,11 @@ async function checkWithGoogleSafeBrowsing(url) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
-        if (!resp.ok) return null; // API error — fall through to ML
+        if (!resp.ok) {
+            const errText = await resp.text();
+            console.error('[DCG] Safe Browsing API failed:', resp.status, errText);
+            return { risk: 'ERROR', reason: `API Error: ${resp.status}`, source: 'google' };
+        }
         const data = await resp.json();
         if (data.matches && data.matches.length > 0) {
             const threat = data.matches[0].threatType;
@@ -79,8 +84,8 @@ async function checkWithGoogleSafeBrowsing(url) {
         }
         return { risk: 'LOW', reason: 'Google Safe Browsing: No threat found', source: 'google' };
     } catch (err) {
-        console.warn('[DCG] Safe Browsing API error:', err.message);
-        return null; // Network failure — fall through to ML
+        console.warn('[DCG] Safe Browsing Network error:', err.message);
+        return { risk: 'ERROR', reason: 'Network failure', source: 'google' };
     }
 }
 
@@ -100,7 +105,16 @@ async function checkUrl(url, tabId) {
     // ── Hard allowlist override ──────────────────────────────────────────────
     // Trusted domains always get LOW risk — no ML or heuristic can override this.
     if (isLegitDomain(url)) {
-        const result = { url, risk: 'LOW', reason: 'Trusted domain (allowlist)', score: 0.0 };
+        const result = { 
+            url, 
+            risk: 'LOW', 
+            reason: 'Trusted domain (allowlist)', 
+            score: 0.0,
+            mlRisk: 'LOW',
+            mlReason: 'Local ML: Trusted domain',
+            googleRisk: 'LOW',
+            googleReason: 'Google Safe Browsing: Trusted domain'
+        };
         saveToHistory(result);
         return result;
     }

@@ -453,10 +453,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (googleBadge && googleReasonEl) {
             const gRisk = googleRisk || null;
             if (gRisk) {
-                googleBadge.textContent  = RISK_BADGE_TEXT[gRisk] || gRisk;
-                googleBadge.style.color  = RISK_COLOR[gRisk];
-                googleReasonEl.textContent = googleReason || '';
-            } else if (reason === 'Browser internal URL') {
+                if (gRisk === 'ERROR') {
+                    googleBadge.textContent = 'API Error';
+                    googleBadge.style.color = '#ff4b4b';
+                    googleReasonEl.textContent = googleReason || 'Request failed';
+                } else {
+                    googleBadge.textContent  = RISK_BADGE_TEXT[gRisk] || gRisk;
+                    googleBadge.style.color  = RISK_COLOR[gRisk];
+                    googleReasonEl.textContent = googleReason || '';
+                }
+            } else if (reason === 'Browser internal URL' || reason === 'System page or blank') {
                 googleBadge.textContent  = '— Unknown';
                 googleBadge.style.color  = '#a0aebf';
                 googleReasonEl.textContent = 'System page or blank';
@@ -475,7 +481,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             mlBadge.textContent  = RISK_BADGE_TEXT[mRisk] || mRisk;
             mlBadge.style.color  = RISK_COLOR[mRisk] || RISK_COLOR.UNKNOWN;
             
-            if (reason === 'Browser internal URL' && !mlRisk) {
+            if ((reason === 'Browser internal URL' || reason === 'System page or blank') && !mlRisk) {
                 mlReasonEl.textContent = 'System page or blank';
             } else {
                 // Shorten the reason text (strip "Local ML: " prefix if present)

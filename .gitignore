@@ -12,8 +12,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Contains hardcoded API key — never commit this file
-phishing_detector.js
+# Environment variables
+.env
 
 # Build output
 node_modules/
@@ -31,5 +31,3 @@ classified_urls_summary.txt
 # Large dataset
 PhiUSIIL_Phishing_URL_Dataset.csv
 
-# Environment Variables
-.env

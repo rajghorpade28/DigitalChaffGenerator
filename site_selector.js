@@ -298,7 +298,14 @@ export const SiteSelector = {
 
         const chosen = available[Math.floor(Math.random() * available.length)];
         this._recentlyUsed[category] = [...recent, chosen].slice(-10);
-        return chosen;
+
+        // Strip path and query to return only the main page (root domain)
+        try {
+            const urlObj = new URL(chosen);
+            return urlObj.origin + '/';
+        } catch (e) {
+            return chosen;
+        }
     },
 
     // ── Get a guaranteed-safe fallback URL (Wikipedia) ────────────────────────

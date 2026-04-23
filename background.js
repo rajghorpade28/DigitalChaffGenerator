@@ -174,7 +174,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     if (request.type === "CLOSE_NOISE_TABS") {
         console.log('[DCG] Manual request to close noise tabs.');
-        SessionManager.endSession().then(() => {
+        SessionManager.endSession(true).then(() => {
             sendResponse({ success: true, message: "Noise session terminated." });
         }).catch(err => {
             sendResponse({ success: false, error: err.message });

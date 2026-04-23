@@ -9,6 +9,7 @@ export const SessionManager = {
     _startPending: false,
     _currentUrl:   null,   // track which URL is open so we can blacklist it on failure
     _currentCat:   null,   // track persona category for fallback URL selection
+    _openedAt:     0,      // track when the tab was opened to enforce minimum duration
 
     async init() {
         // Load the persistent dead-URL list before anything else
@@ -63,30 +64,36 @@ export const SessionManager = {
 
         const tab = await chrome.tabs.create({ url, active: false });
         this.activeTabId = tab.id;
+        this._openedAt   = Date.now();
 
         let loaded = false;
 
         const listener = (tabId, info) => {
             if (tabId === this.activeTabId && info.status === 'complete') {
                 loaded = true;
-                chrome.tabs.onUpdated.removeListener(listener);
                 this._onTabLoaded(tabId, category, isFallback);
             }
         };
         chrome.tabs.onUpdated.addListener(listener);
+        this._currentListener = listener;
+        this._clearTimer();
 
-        // 12-second hard timeout for loading the tab
-        setTimeout(async () => {
+        // 1. Initial 12-second load timeout
+        const loadTimeout = setTimeout(async () => {
             if (!loaded && this.activeTabId === tab.id) {
                 console.warn(`[DCG] Tab ${tab.id} took too long to load (${url}). Closing and retrying instantly.`);
-                chrome.tabs.onUpdated.removeListener(listener);
-                SiteSelector.markAsDead(url);
-                await this.endSession();
-                
-                // Immediately start a new session since this one failed to launch
+                this._clearListener();
+                SiteSelector.markDead(url);
+                await this.endSession(true); 
                 setTimeout(() => this.startSession(), 500);
             }
         }, 12000);
+
+        // 2. Strict 70-second total session duration (starts NOW)
+        this.sessionTimer = setTimeout(() => {
+            console.log('[DCG] Strict 70s limit reached — closing noise tab.');
+            this.endSession();
+        }, 70_000);
     },
 
     // ── Inject scripts once the tab has fully loaded ─────────────────────
@@ -120,14 +127,6 @@ export const SessionManager = {
             console.log(`[DCG] Scripts injected into tab ${tabId} (${isFallback ? 'fallback' : 'dataset'} URL).`);
             await TaskStateManager.set('SIMULATING', { url: this._currentUrl, category, isFallback });
             MetricsEngine.updateMetrics(category);
-
-            // Safety-net: close after 90 s if SIMULATION_DONE never arrives
-            this._clearTimer();
-            this.sessionTimer = setTimeout(() => {
-                console.log('[DCG] Safety-net: closing noise tab after 90 s.');
-                this.endSession();
-            }, 90_000);
-
         } catch (error) {
             const msg = error?.message || '';
             const isErrorPage =
@@ -174,11 +173,21 @@ export const SessionManager = {
     // ── Close the noise tab cleanly ──────────────────────────────────────
     async endSession(isStopped = false) {
         this._clearTimer();
+        this._clearListener();
 
         if (this.activeTabId) {
             const idToClose  = this.activeTabId;
             this.activeTabId = null;
             this._currentUrl = null;
+
+            // ── Enforce 70-second strict duration ──────────────────────────
+            const elapsed = Date.now() - this._openedAt;
+            const target  = 70000;
+            if (elapsed < target && !isStopped) {
+                const waitTime = target - elapsed;
+                console.log(`[DCG] Enforcing 70s duration. Waiting ${Math.round(waitTime/1000)}s...`);
+                await new Promise(r => setTimeout(r, waitTime));
+            }
 
             await TaskStateManager.set('CLOSING');
             try {
@@ -205,4 +214,11 @@ export const SessionManager = {
             this.sessionTimer = null;
         }
     },
+
+    _clearListener() {
+        if (this._currentListener) {
+            chrome.tabs.onUpdated.removeListener(this._currentListener);
+            this._currentListener = null;
+        }
+    }
 };
