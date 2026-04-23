@@ -1,0 +1,43 @@
+.tech__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.tech-group {
+  padding: 28px;
+}
+
+.tech-group__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tech-group__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tech-group__item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tech-group__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.tech-group__desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
